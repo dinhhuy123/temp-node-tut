@@ -1,35 +1,35 @@
 const express = require('express');
 const app = express();
-const { products } = require('./data')
+const morgan = require('morgan')
+const logger = require('./logger')
+const authorize = require('./authorize')
 
+// req => middleware => res
+
+// 1. use vs route
+// 2. options - our own / express / third party
+
+// api/home/about/products
+// app.use([logger, authorize]);
+// app.use(express.static('./public'))
+app.use(morgan('tiny'))
 app.get('/', (req, res) => {
-    res.send('<h1>Home Page</h1><a href="api/products">products</a>')
+    res.send('Home')
+})
+
+app.get('/about', (req, res) => {
+    res.send('About')
 })
 
 app.get('/api/products', (req, res) => {
-    const newProducts = products.map(product => {
-        const {id, name, image} = product
-        return {id, name, image}
-    })
-    res.json(newProducts)
+    res.send('Products')
 })
 
-app.get('/api/products/:productID', (req, res) => {
-    // console.log(req)
-    // console.log(req.params)
-    const {productID} = req.params
-
-    const singleProducts = products.find(product => product.id === Number(productID))
-    if (!singleProducts) {
-        return res.status(404).send('Product does not exist')
-    }
-})
-
-app.get('/api/products/:productID/reviews/:reviewID', (req, res) => {
-    console.log(req.params)
-    res.send('Hello world')
+app.get('/api/items', [logger, authorize] ,(req, res) => {
+    console.log(req.user)
+    res.send('Items')
 })
 
 app.listen(5000, () => {
-    console.log('Server is listening on port 5000...');
+    console.log('Server is listening on port 5000....')
 })
